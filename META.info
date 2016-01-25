@@ -1,0 +1,20 @@
+{
+    "name": "Bkp",
+    "version": "0.1",
+    "perl": "6.c",
+    "description": "Backup Tool",
+    "authors": [ "Dmitry Kopytov" ],
+    "source-url": "git://github.com/kopytov/bkp",
+    "support" : {
+        "bugtracker" : "https://github.com/kopytov/bkp/issues",
+        "source" : "git://github.com/kopytov/bkp.git"
+    },
+    "depends": [ "YAMLish" ],
+    "provides": {
+        "Bkp::Types": "lib/Bkp/Types.pm6",
+        "Bkp::Src::Tar": "lib/Bkp/Src/Tar.pm6",
+        "Bkp::Compress::Gzip": "lib/Bkp/Compress/Gzip.pm6",
+        "Bkp::Dst": "lib/Bkp/Dst.pm6",
+        "Bkp::Dst::Local": "lib/Bkp/Dst/Local.pm6"
+    }
+}
