@@ -1,4 +1,4 @@
-use Bkp::Types;
+use Bkp;
 
 unit class Bkp::Compress::Gzip;
 

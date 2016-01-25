@@ -1,6 +1,6 @@
 #!/usr/bin/env perl6
 use YAMLish;
-use Bkp::Types;
+use Bkp;
 
 sub load-class ( Str:D $namespace, Str:D $class ) {
     my $package = "Bkp::{$namespace.lc.tc}::{$class.lc.tc}";

@@ -1,5 +1,5 @@
+use Bkp;
 use Bkp::Dst;
-use Bkp::Types;
 
 unit class Bkp::Dst::Local is Bkp::Dst;
 
