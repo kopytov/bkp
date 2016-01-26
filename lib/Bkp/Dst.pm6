@@ -39,10 +39,12 @@ method next-archive () {
     my $today = DateTime.now.Date;
 
     # last archive
-    my $last-archive = self.all-archives[* - 1];
-    if ( $last-archive ~~ self.is-archive ) {
-        my $date = Date.new(~$0);
-        return $last-archive if $date == $today;
+    if self.all-archives.elems > 0 {
+        my $last-archive = self.all-archives[* - 1];
+        if $last-archive ~~ self.is-archive {
+            my $date = Date.new(~$0);
+            return $last-archive if $date == $today;
+        }
     }
 
     # next archive
