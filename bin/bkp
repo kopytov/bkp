@@ -28,7 +28,8 @@ sub run-profile (%profile) {
 multi MAIN (*@filenames) {
     for @filenames -> FilePath $filename {
         my %profile = load-yaml $filename.IO.slurp;
-        my $prefix  = $filename ~~ /:i (.+) \. ya?ml $/ ?? ~$0 !! $filename.lc;
+        my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
+          ?? ~$0 !! $filename.IO.basename.lc;
         %profile<dst><prefix> //= $prefix;
         run-profile %profile;
     }
