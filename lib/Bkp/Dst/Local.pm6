@@ -12,9 +12,7 @@ method enumerate () {
 method send () {
     my $filename = "$!dir/{self.next-archive}";
     my $fh       = open $filename, :bin, :w;
-    while ( my $buf = $.src.out.read(262_144) ) {
-        $fh.write($buf);
-    }
+    run 'cat', :in($.src.out), :out($fh);
     $fh.close;
 }
 
