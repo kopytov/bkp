@@ -1,13 +1,13 @@
 use Bkp;
+use Bkp::Src;
 
-unit class Bkp::Src::Tar;
+unit class Bkp::Src::Tar is Bkp::Src;
 
 has Str $.suffix = 'tar';
 has @.cmd = <tar --numeric-owner -cf ->;
 has $.files is required;
 has $.exclude;
 has DirPath $.cwd;
-has Proc $!proc;
 
 method build-cmd () {
     my @cmd = @!cmd.clone;
@@ -15,9 +15,4 @@ method build-cmd () {
     @cmd.append: $!exclude.list.grep( {.defined} ).map( {"--exclude=$_"} );
     @cmd.append: $!files.list;
     return @cmd;
-}
-
-method out () {
-    $!proc //= run |self.build-cmd, :bin, :out;
-    return $!proc.out;
 }
