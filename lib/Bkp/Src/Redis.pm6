@@ -1,12 +1,10 @@
 use Bkp;
-use Bkp::Src;
 
-unit class Bkp::Src::Redis is Bkp::Src;
+unit class Bkp::Src::Redis;
 
 has Str $.suffix = 'rdb';
-has @.cmd = 'cat';
-has $.dump is required;
+has FilePath $.dump is required;
 
-method build-cmd () {
-    flat @!cmd, $!dump;
+method out () {
+    open $!dump, :r;
 }
