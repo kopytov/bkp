@@ -13,7 +13,25 @@ method !run-ncftp ( *%opt ) {
     return run «ncftp -u $!username -p $!password $url», |%opt;
 }
 
+method mk_path () {
+    return if $!path eq '/'|'.';
+    my $path = $!path;
+    $!path   = '/';
+    my $null = open '/dev/null', :w;
+    my $proc = self!run-ncftp: :in, :out($null);
+    for $path.split('/') -> $dir {
+        next if !$dir.chars;
+        next if $dir eq '.';
+        $proc.in.put: "mkdir $dir";
+        $proc.in.put: "cd $dir";
+    }
+    $proc.in.close;
+    $null.close;
+    $!path = $path;
+}
+
 method enumerate () {
+    self.mk_path;
     my $proc = self!run-ncftp: :in, :out;
     $proc.in.put: 'ls -1';
     $proc.in.close;
