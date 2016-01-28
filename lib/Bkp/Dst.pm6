@@ -8,13 +8,13 @@ has %!archives-of;
 has $!archives-of-initialized = False;
 
 method is-archive ( $period = /<[ymwd]>/ ) {
-    my $prefix = $!prefix;
-    my $suffix = $!src.suffix;
+    my $prefix      = $!prefix;
+    my $main-suffix = $!src.suffix.split('.')[0];
     return rx{
         ^ $prefix
         \- ( \d\d\d\d \- \d\d \- \d\d )
         \- ( $period )
-        \. $suffix $
+        \. $main-suffix
     };
 }
 
