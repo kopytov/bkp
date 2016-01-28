@@ -2,6 +2,14 @@
 use YAMLish;
 use Bkp;
 
+sub load-profile ( FilePath $filename ) {
+    my %profile = load-yaml $filename.IO.slurp;
+    my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
+      ?? ~$0 !! $filename.IO.basename.lc;
+    %profile<dst><prefix> //= $prefix;
+    return %profile;
+}
+
 sub load-class ( Str:D $namespace, Str:D $class ) {
     my $package = "Bkp::{$namespace.lc.tc}::{$class.lc.tc}";
     require ::($package);
@@ -14,7 +22,7 @@ sub add-middleware ( $src, $namespace, %profile ) {
          . new( |%profile, src => $src );
 }
 
-sub run-profile (%profile) {
+sub get-dst (%profile) {
     my $src = load-class( 'src', %profile<src><class>:delete )
             . new( |%profile<src> );
     $src = add-middleware $src, 'compress', %profile;
@@ -22,16 +30,20 @@ sub run-profile (%profile) {
     $src = add-middleware $src, 'shape', %profile;
     my $dst = load-class( 'dst', %profile<dst><class> )
             . new( |%profile<dst>, src => $src );
-    $dst.SEND;
+    return $dst;
 }
 
 multi MAIN (*@filenames) {
     for @filenames -> FilePath $filename {
-        my %profile = load-yaml $filename.IO.slurp;
-        my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
-          ?? ~$0 !! $filename.IO.basename.lc;
-        %profile<dst><prefix> //= $prefix;
-        run-profile %profile;
+        my %profile = load-profile $filename;
+        my $dst     = get-dst %profile;
+        $dst.SEND;
     }
+}
+
+multi MAIN ( 'list', FilePath $filename ) {
+    my %profile = load-profile $filename;
+    my $dst     = get-dst %profile;
+   .say for $dst.all-archives;
 }
 
