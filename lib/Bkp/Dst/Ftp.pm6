@@ -38,8 +38,7 @@ method enumerate () {
     return $proc.out.lines;
 }
 
-method send () {
-    my $archive  = self.next-archive;
+method send ( Str $archive ) {
     my $filename = $!path.ends-with('/')
       ?? "$!path$archive" !! "$!path/$archive";
     $filename = ".$filename" if $filename.starts-with('/');

@@ -21,9 +21,9 @@ method is-archive ( $period = /<[ymwd]>/ ) {
 method archives () {
     return %!archives-of if $!archives-of-initialized;
     $!archives-of-initialized = True;
-    my @archives = self.enumerate.sort;
+    my @archives = $.enumerate.sort;
     for @archives -> $archive {
-        next if $archive !~~ self.is-archive;
+        next if $archive !~~ $.is-archive;
         my $period = ~$1;
         %!archives-of{$period} //= [];
         %!archives-of{$period}.push($archive);
@@ -32,23 +32,32 @@ method archives () {
 }
 
 method all-archives () {
-    self.archives.values.map( { |$_ } ).sort;
+    $.archives.values.map( { |$_ } ).sort;
+}
+
+method clear-archives () {
+    $!archives-of-initialized = False;
+    %!archives-of             = ();
 }
 
 method next-archive () {
     my $today = DateTime.now.Date;
 
     # last archive
-    if self.all-archives.elems > 0 {
-        my $last-archive = self.all-archives[* - 1];
-        if $last-archive ~~ self.is-archive {
+    if $.all-archives.elems > 0 {
+        my $last-archive = $.all-archives[* - 1];
+        if $last-archive ~~ $.is-archive {
             my $date = Date.new(~$0);
-            return $last-archive if $date == $today;
+            if $date == $today {
+                $.delete($last-archive);
+                $.clear-archives;
+                return $last-archive;
+            }
         }
     }
 
     # next archive
-    my %archives-of = self.archives;
+    my %archives-of = $.archives;
     my %days-of     = y => 365, m => 30, w => 7, d => 1;
     my $next-period;
     for <y m w d> -> $period {
@@ -56,7 +65,7 @@ method next-archive () {
         $next-period = $period;
         last if !%archives-of{$period};
         my $last-archive = %archives-of{$period}[* - 1];
-        next if $last-archive !~~ self.is-archive($period);
+        next if $last-archive !~~ $.is-archive($period);
         my $date = Date.new(~$0);
         last if $date <= $today.earlier( days => %days-of{$period} );
     }
@@ -64,31 +73,33 @@ method next-archive () {
 }
 
 method SEND () {
-    self.send;
-    $!archives-of-initialized = False;
-    %!archives-of             = ();
-    self.rotate;
+    my $next-archive = $.next-archive;
+    my $next-period  = ~$1 if $next-archive ~~ $.is-archive;
+    $.rotate($next-period);
+    $.send($next-archive);
+    $.clear-archives;
 }
 
-method rotate () {
-    my %archives-of = self.archives;
+method rotate ( Str $next-period? ) {
+    my %archives-of = $.archives;
     my %sum         = <y m w d>.map: -> $period {
         $period => %archives-of{$period}:exists
                 ?? %archives-of{$period}.elems
                 !! 0;
     };
-    my %num_excess  = <y m w d>.map: -> $period {
+    %sum{$next-period}++ if $next-period && %sum{$next-period};
+    my %num-excess  = <y m w d>.map: -> $period {
         next if !%!plan{$period};
         next if !%sum{$period};
-        my $num_excess = %sum{$period} - %!plan{$period};
-        next if $num_excess <= 0;
-        $period => $num_excess;
+        my $num-excess = %sum{$period} - %!plan{$period};
+        next if $num-excess <= 0;
+        $period => $num-excess;
     }
-    return if !%num_excess.elems;
+    return if !%num-excess.elems;
 
-    for %num_excess.kv -> $period, $num_excess {
-        for %archives-of{$period}[ ^$num_excess ] -> $archive {
-            self.delete($archive);
+    for %num-excess.kv -> $period, $num-excess {
+        for %archives-of{$period}[ ^$num-excess ] -> $archive {
+            $.delete($archive);
         }
     }
 }

@@ -9,8 +9,8 @@ method enumerate () {
     $!dir.IO.dir.map: { .basename };
 }
 
-method send () {
-    my $filename = "$!dir/{self.next-archive}";
+method send ( Str $archive ) {
+    my $filename = "$!dir/$archive";
     my $fh       = open $filename, :bin, :w;
     run 'cat', :in($.src.out), :out($fh);
     $fh.close;
