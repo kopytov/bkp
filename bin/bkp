@@ -2,6 +2,12 @@
 use YAMLish;
 use Bkp;
 
+sub log ( Str:D $message ) {
+    return unless %*ENV<BKP_LOG>;
+    my $time = DateTime.now.truncated-to('second');
+    note "$time bkp: [$*PID] $message";
+}
+
 sub load-profile ( FilePath $filename ) {
     my %profile = load-yaml $filename.IO.slurp;
     my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
@@ -34,16 +40,20 @@ sub get-dst (%profile) {
 }
 
 multi MAIN (*@filenames) {
+    return unless @filenames.elems;
+    log "Got profile: $_" for @filenames;
     for @filenames -> FilePath $filename {
+        log $filename.IO.basename ~ ' started';
         my %profile = load-profile $filename;
         my $dst     = get-dst %profile;
         $dst.SEND;
+        log $filename.IO.basename ~ ' finished';
     }
 }
 
 multi MAIN ( 'list', FilePath $filename ) {
     my %profile = load-profile $filename;
     my $dst     = get-dst %profile;
-   .say for $dst.all-archives;
+    $dst.all-archives».say;
 }
 
