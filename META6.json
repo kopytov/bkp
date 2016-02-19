@@ -14,6 +14,7 @@
         "Bkp": "lib/Bkp.pm6",
         "Bkp::Src": "lib/Bkp/Src.pm6",
         "Bkp::Src::Mysql": "lib/Bkp/Src/Mysql.pm6",
+        "Bkp::Src::Ploop": "lib/Bkp/Src/Ploop.pm6",
         "Bkp::Src::Redis": "lib/Bkp/Src/Redis.pm6",
         "Bkp::Src::Tar": "lib/Bkp/Src/Tar.pm6",
         "Bkp::Middleware": "lib/Bkp/Middleware.pm6",
