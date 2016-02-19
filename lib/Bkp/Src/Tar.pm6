@@ -4,7 +4,7 @@ use Bkp::Src;
 unit class Bkp::Src::Tar is Bkp::Src;
 
 has Str $.suffix = 'tar';
-has @.cmd = <tar --numeric-owner -cf ->;
+has @.cmd = <tar --warning=none --numeric-owner -cf ->;
 has $.files is required;
 has $.exclude;
 has DirPath $.cwd;
