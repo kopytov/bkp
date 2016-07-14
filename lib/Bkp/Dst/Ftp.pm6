@@ -9,7 +9,7 @@ has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
 
 method !run-ncftp ( *%opt ) {
-    my $url = "ftp://$!hostname$!path";
+    my $url = "ftp://$!hostname$!path/";
     return run «ncftp -u $!username -p $!password $url», |%opt;
 }
 
