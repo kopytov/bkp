@@ -4,7 +4,7 @@ use Bkp::Dst;
 unit class Bkp::Dst::Ftp is Bkp::Dst;
 
 has Str $.hostname is required;
-has Str $.path     = '/';
+has Str $.path     = "/{ qx{hostname -s}.trim }";
 has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
 
