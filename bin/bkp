@@ -39,21 +39,39 @@ sub get-dst (%profile) {
     return $dst;
 }
 
-multi MAIN (*@filenames) {
-    return unless @filenames.elems;
-    log "Got profile: $_" for @filenames;
-    for @filenames -> FilePath $filename {
-        log $filename.IO.basename ~ ' started';
-        my %profile = load-profile $filename;
+multi MAIN (*@profiles) {
+    return unless @profiles.elems;
+    log "Got profile: $_" for @profiles;
+    for @profiles -> FilePath $profile {
+        log $profile.IO.basename ~ ' started';
+        my %profile = load-profile $profile;
         my $dst     = get-dst %profile;
         $dst.SEND;
-        log $filename.IO.basename ~ ' finished';
+        log $profile.IO.basename ~ ' finished';
     }
 }
 
-multi MAIN ( 'list', FilePath $filename ) {
-    my %profile = load-profile $filename;
+multi MAIN ( 'list', FilePath $profile ) {
+    my %profile = load-profile $profile;
     my $dst     = get-dst %profile;
     $dst.all-archives».say;
 }
 
+multi MAIN ( 'download', FilePath $profile, Str $archive,
+    Str  :$filename = $archive,
+    Bool :$force    = False,
+) {
+    my %profile = load-profile $profile;
+    my $dst     = get-dst %profile;
+    if ( $filename eq '-' ) {
+        run 'cat', :in( $dst.out($archive) );
+    }
+    else {
+        if ($filename.IO.e) {
+            $force ?? $filename.IO.unlink
+                   !! fail "$filename exists, use --force option";
+        }
+        my $fh = open $filename, :bin, :w;
+        run 'cat', :in( $dst.out($archive) ), :out($fh);
+    }
+}

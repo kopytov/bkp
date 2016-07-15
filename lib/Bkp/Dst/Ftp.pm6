@@ -53,3 +53,8 @@ method delete ( Str $archive ) {
     $proc.in.close;
     $null.close;
 }
+
+method build-receive-cmd ( Str $archive ) {
+    my $url = "ftp://$!hostname/$!path/$archive";
+    return «ncftpget -c -u $!username -p $!password $url»;
+}

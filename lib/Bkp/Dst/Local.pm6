@@ -21,3 +21,7 @@ method delete ( Str $archive ) {
     $filename.IO.unlink;
 }
 
+method build-receive-cmd ( Str $archive ) {
+    my $filename = "$!dir/$archive";
+    return «cat $filename»;
+}

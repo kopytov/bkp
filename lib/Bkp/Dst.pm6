@@ -7,6 +7,8 @@ has %.plan   is required;
 has %!archives-of;
 has $!archives-of-initialized = False;
 
+has Proc $!proc;
+
 method is-archive ( $period = /<[ymwd]>/ ) {
     my $prefix      = $!prefix;
     my $main-suffix = $!src.suffix.split('.')[0];
@@ -103,4 +105,9 @@ method rotate ( Str $next-period? ) {
             $.delete($archive);
         }
     }
+}
+
+method out ( Str $archive ) {
+    $!proc //= run |self.build-receive-cmd($archive), :bin, :out, :err;
+    return $!proc.out;
 }
