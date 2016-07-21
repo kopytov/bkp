@@ -46,7 +46,14 @@ multi MAIN (*@profiles) {
         log $profile.IO.basename ~ ' started';
         my %profile = load-profile $profile;
         my $dst     = get-dst %profile;
-        $dst.SEND;
+        try {
+            CATCH {
+                $dst.src.clean-up;
+                .rethrow;
+            }
+            $dst.SEND;
+            $dst.src.clean-up;
+        }
         log $profile.IO.basename ~ ' finished';
     }
 }

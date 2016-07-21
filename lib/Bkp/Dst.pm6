@@ -80,7 +80,6 @@ method SEND () {
     $.rotate($next-period);
     $.send($next-archive);
     $.clear-archives;
-    $!src.clean-up;
 }
 
 method rotate ( Str $next-period? ) {
