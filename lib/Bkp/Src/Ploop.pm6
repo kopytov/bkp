@@ -12,6 +12,7 @@ has DirPath $.vztmp = '/vz/vztmp';
 has         $.exclude;
 has Str     $!uuid;
 has Str     $!mntpoint;
+has Str     $!quiet = %*ENV<BKP_LOG> ?? '' !! '--quiet';
 
 my regex hex { <[ 0 .. 9 a .. f A .. F ]> }
 my regex uuid {
@@ -48,7 +49,7 @@ method mount () {
         CATCH {
             when X::Proc::Unsuccessful {
                 .throw if .proc.exitcode != 1;
-                run «$!vzctl --quiet snapshot-mount $!ctid --id $.uuid
+                run «$!vzctl $!quiet snapshot-mount $!ctid --id $.uuid
                   --target $!mntpoint»;
             }
         }
@@ -66,7 +67,7 @@ method umount () {
             }
         }
     }
-    run «$!vzctl --quiet snapshot-umount $!ctid --id $.uuid»;
+    run «$!vzctl $!quiet snapshot-umount $!ctid --id $.uuid»;
 }
 
 method mntpoint () {
@@ -85,9 +86,11 @@ method clean-up () {
     }
 
     if $!uuid.defined {
-        run «$!vzctl --quiet snapshot-delete $!ctid --id $!uuid»;
+        run «$!vzctl $!quiet snapshot-delete $!ctid --id $!uuid»;
         $!uuid = Nil;
     }
+
+    run «$!vzctl $!quiet compact $!ctid»;
 }
 
 method build-cmd () {
