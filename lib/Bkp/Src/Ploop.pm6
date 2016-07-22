@@ -90,7 +90,9 @@ method clean-up () {
         $!uuid = Nil;
     }
 
-    run «$!vzctl $!quiet compact $!ctid»;
+    my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
+    run «$!vzctl $!quiet compact $!ctid», :out($null);
+    $null.close unless %*ENV<BKP_LOG>;
 }
 
 method build-cmd () {
