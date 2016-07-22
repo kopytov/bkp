@@ -17,7 +17,7 @@ method mk_path () {
     return if $!path eq '/'|'.';
     my $path = $!path;
     $!path   = '/';
-    my $null = open '/dev/null', :w;
+    my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
     my $proc = self!run-ncftp: :in, :out($null);
     for $path.split('/') -> $dir {
         next if !$dir.chars;
@@ -26,7 +26,7 @@ method mk_path () {
         $proc.in.put: "cd $dir";
     }
     $proc.in.close;
-    $null.close;
+    $null.close unless %*ENV<BKP_LOG>;
     $!path = $path;
 }
 
@@ -42,16 +42,16 @@ method send ( Str $archive ) {
     my $filename = $!path.ends-with('/')
       ?? "$!path$archive" !! "$!path/$archive";
     $filename = ".$filename" if $filename.starts-with('/');
-    my $proc = run «ncftpput -c -u $!username -p $!password
-      $!hostname $filename», :in($.src.out);
+    run «ncftpput -c -u $!username -p $!password $!hostname $filename»,
+      :in($.src.out);
 }
 
 method delete ( Str $archive ) {
-    my $null = open '/dev/null', :w;
+    my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
     my $proc = self!run-ncftp: :in, :out($null);
     $proc.in.put: "rm $archive";
     $proc.in.close;
-    $null.close;
+    $null.close unless %*ENV<BKP_LOG>;
 }
 
 method build-receive-cmd ( Str $archive ) {
