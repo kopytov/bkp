@@ -42,19 +42,24 @@ sub get-dst (%profile) {
 multi MAIN (*@profiles) {
     return unless @profiles.elems;
     log "Got profile: $_" for @profiles;
-    for @profiles -> FilePath $profile {
-        log $profile.IO.basename ~ ' started';
-        my %profile = load-profile $profile;
-        my $dst     = get-dst %profile;
-        try {
-            CATCH {
+  PROFILE: for @profiles -> FilePath $profile {
+        for ^5 -> $attempt {
+            log $profile.IO.basename ~ " started [$attempt]";
+            my %profile = load-profile $profile;
+            my $dst     = get-dst %profile;
+            try {
+                CATCH {
+                    say $profile.IO.basename ~ " failed [$attempt]";
+                    $dst.src.clean-up;
+                    sleep $attempt * 10;
+                }
+                $dst.SEND;
                 $dst.src.clean-up;
-                .throw;
             }
-            $dst.SEND;
-            $dst.src.clean-up;
+            log $profile.IO.basename ~ " finished [$attempt]";
+            next PROFILE;
         }
-        log $profile.IO.basename ~ ' finished';
+        say 'BACKUP ' ~ $profile.IO.basename ~ ' FAILED!';
     }
 }
 
