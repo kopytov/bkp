@@ -18,7 +18,8 @@ sub load-profile ( FilePath $filename ) {
 
 sub load-class ( Str:D $namespace, Str:D $class ) {
     my $package = "Bkp::{$namespace.lc.tc}::{$class.lc.tc}";
-    require ::($package);
+    try require ::($package);
+    fail "Failed to load $package" if ::($package) ~~ Failure;
     return ::($package);
 }
 
