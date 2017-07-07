@@ -102,6 +102,6 @@ method build-cmd () {
       .grep(*.defined)
       .map( { .starts-with('/') ?? .substr(1) !! $_ } )
       .map( '--exclude=' ~ * );
-    @cmd.append: $.mntpoint.IO.dir».basename;
+    @cmd.append: '.';
     return @cmd;
 }
