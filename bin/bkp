@@ -26,7 +26,7 @@ sub load-class ( Str:D $namespace, Str:D $class ) {
 sub add-middleware ( $src, $namespace, %profile ) {
     return $src if !%profile{$namespace};
     return load-class( $namespace, %profile{$namespace}<class>:delete )
-         . new( |%profile, src => $src );
+         . new( |%profile{$namespace}, src => $src );
 }
 
 sub get-dst (%profile) {
