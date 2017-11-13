@@ -19,6 +19,8 @@
         "Bkp::Src::Tar": "lib/Bkp/Src/Tar.pm6",
         "Bkp::Middleware": "lib/Bkp/Middleware.pm6",
         "Bkp::Compress::Gzip": "lib/Bkp/Compress/Gzip.pm6",
+        "Bkp::Compress::Pigz": "lib/Bkp/Compress/Pigz.pm6",
+        "Bkp::Crypt::Openssl": "lib/Bkp/Crypt/Openssl.pm6",
         "Bkp::Dst": "lib/Bkp/Dst.pm6",
         "Bkp::Dst::Ftp": "lib/Bkp/Dst/Ftp.pm6",
         "Bkp::Dst::Local": "lib/Bkp/Dst/Local.pm6"
