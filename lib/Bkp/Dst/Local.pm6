@@ -39,6 +39,9 @@ method mount {
     $proc = run |@mount;
     fail 'mount command returned non-zero code' if $proc.exitcode;
 
+    $proc = run <<mountpoint -q $mountpoint>>;
+    fail 'mountpoint actually not mounted after mount' if $proc.exitcode;
+
     my DirPath $endpoint = $!dir;
 }
 
