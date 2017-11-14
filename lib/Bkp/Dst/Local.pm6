@@ -3,8 +3,8 @@ use Bkp::Dst;
 
 unit class Bkp::Dst::Local is Bkp::Dst;
 
-has DirPath $.dir is required;
-has         %.mount;
+has Str $.dir is required;
+has     %.mount;
 
 method enumerate () {
     $!dir.IO.dir.map: { .basename };
@@ -38,6 +38,8 @@ method mount {
     my @mount = %!mount<cmd>:exists ?? |%!mount<cmd> !! <<mount $mountpoint>>;
     $proc = run |@mount;
     fail 'mount command returned non-zero code' if $proc.exitcode;
+
+    my DirPath $endpoint = $!dir;
 }
 
 method umount {
