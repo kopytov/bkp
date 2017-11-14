@@ -32,7 +32,7 @@ method mount {
     fail 'mount.point should be defined' unless %!mount<point>:exists;
     my Proc $proc;
     my DirPath $mountpoint = %!mount<point>;
-    $proc = run <<is_mountpoint -q $mountpoint>>;
+    $proc = run <<mountpoint -q $mountpoint>>;
     return if $proc.exitcode == 0;
 
     my @mount = %!mount<cmd>:exists ?? |%!mount<cmd> !! <<mount $mountpoint>>;
@@ -47,7 +47,7 @@ method umount {
     fail 'mount.point should be defined' unless %!mount<point>:exists;
     my Proc $proc;
     my DirPath $mountpoint = %!mount<point>;
-    $proc = run <<is_mountpoint -q $mountpoint>>;
+    $proc = run <<mountpoint -q $mountpoint>>;
     return if $proc.exitcode;
 
     $proc = run <<umount $mountpoint>>;
