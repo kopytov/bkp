@@ -110,3 +110,6 @@ method out ( Str $archive ) {
     $!proc //= run |self.build-receive-cmd($archive), :bin, :out, :err;
     return $!proc.out;
 }
+
+method mount  { }
+method umount { }

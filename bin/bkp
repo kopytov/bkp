@@ -37,6 +37,7 @@ sub get-dst (%profile) {
     $src = add-middleware $src, 'shape', %profile;
     my $dst = load-class( 'dst', %profile<dst><class> )
             . new( |%profile<dst>, src => $src );
+    $dst.mount;
     return $dst;
 }
 
@@ -57,6 +58,7 @@ multi MAIN (*@profiles) {
                 }
                 $dst.SEND;
                 $dst.src.clean-up;
+                $dst.umount;
             }
             log $profile.IO.basename ~ " finished [$attempt]";
             next PROFILE;
@@ -69,6 +71,7 @@ multi MAIN ( 'list', FilePath $profile ) {
     my %profile = load-profile $profile;
     my $dst     = get-dst %profile;
     $dst.all-archives».say;
+    $dst.umount;
 }
 
 multi MAIN ( 'download', FilePath $profile, Str $archive,
@@ -88,4 +91,5 @@ multi MAIN ( 'download', FilePath $profile, Str $archive,
         my $fh = open $filename, :bin, :w;
         run 'cat', :in( $dst.out($archive) ), :out($fh);
     }
+    $dst.umount;
 }
