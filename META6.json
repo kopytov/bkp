@@ -13,6 +13,7 @@
     "provides": {
         "Bkp": "lib/Bkp.pm6",
         "Bkp::Src": "lib/Bkp/Src.pm6",
+        "Bkp::Src::Cmd": "lib/Bkp/Src/Cmd.pm6",
         "Bkp::Src::Mysql": "lib/Bkp/Src/Mysql.pm6",
         "Bkp::Src::Ploop": "lib/Bkp/Src/Ploop.pm6",
         "Bkp::Src::Redis": "lib/Bkp/Src/Redis.pm6",
