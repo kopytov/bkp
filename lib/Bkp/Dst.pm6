@@ -25,7 +25,7 @@ method archives () {
     $!archives-of-initialized = True;
     my @archives = $.enumerate.sort;
     for @archives -> $archive {
-        next if $archive !~~ $.is-archive;
+        next if $archive{'filename'} !~~ $.is-archive;
         my $period = ~$1;
         %!archives-of{$period} //= [];
         %!archives-of{$period}.push($archive);

@@ -70,7 +70,7 @@ multi MAIN (*@profiles) {
 multi MAIN ( 'list', FilePath $profile ) {
     my %profile = load-profile $profile;
     my $dst     = get-dst %profile;
-    $dst.all-archives».say;
+    say "$_{'filename'} ", ($_{'size'}/1024/1024).Int, "Mb" for $dst.all-archives;
     $dst.umount;
 }
 
