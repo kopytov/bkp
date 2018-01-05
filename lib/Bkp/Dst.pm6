@@ -47,7 +47,7 @@ method next-archive () {
 
     # last archive
     if $.all-archives.elems > 0 {
-        my $last-archive = $.all-archives[* - 1];
+        my $last-archive = $.all-archives.map( { $_{'filename'} } ).[* - 1];
         if $last-archive ~~ $.is-archive {
             my $date = Date.new(~$0);
             if $date == $today {
@@ -101,7 +101,7 @@ method rotate ( Str $next-period? ) {
 
     for %num-excess.kv -> $period, $num-excess {
         for %archives-of{$period}[ ^$num-excess ] -> $archive {
-            $.delete($archive);
+            $.delete($archive{'filename'});
         }
     }
 }
