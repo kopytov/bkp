@@ -35,16 +35,16 @@ method enumerate () {
     my $proc = self!run-ncftp: :in, :out;
     $proc.in.put: 'ls -l';
     $proc.in.close;
-    my @result;
-    for $proc.out.lines -> $l {
-        my ( $size, $filename ) = split( /\s+/, $l)[ 3, 7 ];
-        next if !$filename or !$size;
-        push @result, {
-          filename => $filename,
-          size     => $size,
+    my @files;
+    for $proc.out.lines -> $line {
+        my ( $size, $file ) = split( /\s+/, $line)[ 3, 7 ];
+        next if !$file or !$size;
+        push @files, {
+          file => $file,
+          size => $size,
         };
     }
-    return @result;
+    return @files;
 }
 
 method send ( Str $archive ) {
