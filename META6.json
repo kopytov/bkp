@@ -1,6 +1,6 @@
 {
     "name": "Bkp",
-    "version": "0.1",
+    "version": "0.2",
     "perl": "6.c",
     "description": "Backup Tool",
     "authors": [ "Dmitry Kopytov" ],

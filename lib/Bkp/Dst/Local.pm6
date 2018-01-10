@@ -7,7 +7,14 @@ has Str $.dir is required;
 has     %.mount;
 
 method enumerate () {
-    $!dir.IO.dir.map: { .basename };
+    my @files;
+    for $!dir.IO.dir.sort.map: { .basename, .s } -> $file {
+        push @files, {
+          file => $file[0],
+          size => $file[1],
+        };
+    }
+    return @files;
 }
 
 method send ( Str $archive ) {
