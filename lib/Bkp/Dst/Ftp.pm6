@@ -33,11 +33,11 @@ method mk_path () {
 method enumerate () {
     self.mk_path;
     my $proc = self!run-ncftp: :in, :out;
-    $proc.in.put: 'ls -l';
+    $proc.in.put: 'ls -la';
     $proc.in.close;
     my @files;
     for $proc.out.lines -> $line {
-        my ( $size, $file ) = split( /\s+/, $line)[ 3, 7 ];
+        my ( $size, $file ) = split( /\s+/, $line)[ 4, 8 ];
         next if !$file or !$size;
         push @files, {
           file => $file,
