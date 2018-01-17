@@ -67,10 +67,31 @@ multi MAIN (*@profiles) {
     }
 }
 
-multi MAIN ( 'list', FilePath $profile ) {
+multi MAIN ( 'list', FilePath $profile, Bool :$bytes = False ) {
     my %profile = load-profile $profile;
     my $dst     = get-dst %profile;
-    say "$_{'file'} ", ($_{'size'}/1024/1024).Int, "Mb" for $dst.all-archives;
+    if $bytes {
+        say "$_{'file'} $_{'size'}" for $dst.all-archives;
+    }
+    else {
+        ARCHIVE: for $dst.all-archives -> $archive {
+            my @suffixes = (
+                1099511627776 => 'T',
+                1073741824    => 'G',
+                1048576       => 'M',
+                1024          => 'K',
+            );
+            for @suffixes {
+                my ( $factor, $suffix ) = $_.kv;
+                if $archive<size> >= $factor {
+                    my $human_readable_size = ( $archive<size> / $factor ).fmt: "%.1f$suffix";
+                    say "$archive<file> $human_readable_size";
+                    next ARCHIVE;
+                }
+            }
+            say "$archive<file> $archive<size>B";
+        }
+    }
     $dst.umount;
 }
 
