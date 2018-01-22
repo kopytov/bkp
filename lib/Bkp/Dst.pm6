@@ -66,7 +66,7 @@ method next-archive () {
         next if !%!plan{$period};
         $next-period = $period;
         last if !%archives-of{$period};
-        my $last-archive = %archives-of{$period}[* - 1];
+        my $last-archive = %archives-of{$period}[* - 1]{'file'};
         next if $last-archive !~~ $.is-archive($period);
         my $date = Date.new(~$0);
         last if $date <= $today.earlier( days => %days-of{$period} );
