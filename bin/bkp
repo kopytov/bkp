@@ -46,20 +46,19 @@ multi MAIN (*@profiles) {
     log "Got profile: $_" for @profiles;
   PROFILE: for @profiles -> FilePath $profile {
       ATTEMPT: for ^5 -> $attempt {
-            sleep $attempt * 10;
             log $profile.IO.basename ~ " started [$attempt]";
             my %profile = load-profile $profile;
             my $dst     = get-dst %profile;
             try {
                 CATCH {
                     say $profile.IO.basename ~ " failed [$attempt]";
-                    $dst.src.clean-up;
+                    sleep $attempt * 60;
                     next ATTEMPT;
                 }
                 $dst.SEND;
-                $dst.src.clean-up;
-                $dst.umount;
             }
+            $dst.src.clean-up;
+            $dst.umount;
             log $profile.IO.basename ~ " finished [$attempt]";
             next PROFILE;
         }
