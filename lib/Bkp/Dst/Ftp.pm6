@@ -10,7 +10,8 @@ has Str $.password = 'test@test.com';
 
 method !run-ncftp ( *%opt ) {
     my $url = "ftp://$!hostname$!path/";
-    return run «ncftp -u $!username -p $!password $url», |%opt;
+    my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
+    return run «ncftp -u $!username -p $!password $url», :err($null), |%opt;
 }
 
 method mk_path () {
