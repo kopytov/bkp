@@ -8,6 +8,7 @@ has %!archives-of;
 has $!archives-of-initialized = False;
 
 has Proc $!proc;
+has $!null;
 
 method is-archive ( $period = /<[ymwd]>/ ) {
     my $prefix      = $!prefix;
@@ -107,7 +108,8 @@ method rotate ( Str $next-period? ) {
 }
 
 method out ( Str $archive ) {
-    $!proc //= run |self.build-receive-cmd($archive), :bin, :out, :err;
+    $!null = %*ENV<BKP_LOG> ?? $*ERR !! open '/dev/null', :w;
+    $!proc //= run |self.build-receive-cmd($archive), :bin, :out, :err($!null);
     return $!proc.out;
 }
 
