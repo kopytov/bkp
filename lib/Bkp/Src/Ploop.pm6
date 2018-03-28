@@ -8,7 +8,6 @@ has @.cmd = <tar --warning=none --numeric-owner -cf ->;
 
 has CTID    $.ctid is required;
 has Str     $.vzctl = 'vzctl';
-has DirPath $.vztmp = '/vz/vztmp';
 has         $.exclude;
 has Str     $!uuid;
 has Str     $!mntpoint;
@@ -23,6 +22,9 @@ my regex uuid {
     <hex> ** 12
 }
 
+method is-vz7 () { return $!ctid ~~ /^(<uuid>)$/ }
+method is-vz6 () { return not $.is-vz7 }
+
 method uuid () {
     return $!uuid if $!uuid.defined;
     my $proc;
@@ -34,8 +36,7 @@ method uuid () {
         return $!uuid;
     }
 
-    $proc = run «$!vzctl snapshot $!ctid --name bkp --skip-config
-        --skip-suspend», :out;
+    $proc = run «$!vzctl snapshot $!ctid --name bkp --skip-suspend», :out;
     $proc.out.slurp-rest
         ~~ / 'Snapshot {' ( <uuid> ) '} has been successfully created' /;
     fail "Failed to create snapshot for CT$!ctid" unless $0.defined;
@@ -72,7 +73,7 @@ method umount () {
 
 method mntpoint () {
     return $!mntpoint if $!mntpoint.defined;
-    $!mntpoint = "$!vztmp/mnt$!ctid";
+    $!mntpoint = "/mnt/$!ctid";
     $!mntpoint.IO.mkdir unless $!mntpoint.IO.d;
     $.mount;
     return $!mntpoint;
@@ -91,7 +92,7 @@ method clean-up () {
     }
 
     my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
-    run «$!vzctl $!quiet compact $!ctid», :out($null);
+    run «$!vzctl $!quiet compact $!ctid», :out($null) if $.is-vz6;
     $null.close unless %*ENV<BKP_LOG>;
 }
 
