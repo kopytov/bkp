@@ -44,11 +44,20 @@ sub get-dst (%profile) {
 multi MAIN (*@profiles) {
     return unless @profiles.elems;
     log "Got profile: $_" for @profiles;
-  PROFILE: for @profiles -> FilePath $profile {
+  PROFILE: for @profiles -> $profile {
       ATTEMPT: for ^10 -> $attempt {
             log $profile.IO.basename ~ " started [$attempt]";
-            my %profile = load-profile $profile;
-            my $dst     = get-dst %profile;
+            my %profile;
+            try {
+                CATCH {
+                    say $profile.IO.basename ~ " loading failed - skipping";
+                    .Str.say;
+                    next PROFILE;
+                }
+                %profile = load-profile $profile;
+            }
+
+            my $dst = get-dst %profile;
             try {
                 CATCH {
                     say $profile.IO.basename ~ " failed [$attempt]";
