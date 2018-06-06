@@ -22,7 +22,12 @@ my regex uuid {
     <hex> ** 12
 }
 
-method is-vz7 () { return $!ctid ~~ /^(<uuid>)$/ }
+method is-vz7 () {
+    my $release = '/etc/redhat-release';
+    return ($!ctid ~~ /^(<uuid>)$/
+        or ($release.IO.f &&
+           ($release.IO.slurp ~~ /(\d+(\.\d+)?)/).Int >= 7 ));
+}
 method is-vz6 () { return not $.is-vz7 }
 
 method uuid () {
