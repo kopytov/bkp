@@ -61,6 +61,7 @@ multi MAIN (*@profiles) {
             try {
                 CATCH {
                     say $profile.IO.basename ~ " failed [$attempt]";
+                    $dst.src.KILL;
                     sleep $attempt * 180;
                     next ATTEMPT;
                 }
