@@ -20,8 +20,9 @@ method enumerate () {
 method send ( Str $archive ) {
     my $filename = "$!dir/$archive";
     my $fh       = open $filename, :bin, :w;
-    run 'cat', :in($.src.out), :out($fh);
+    my $proc     = run 'cat', :in($.src.out), :out($fh);
     $fh.close;
+    return $proc;
 }
 
 method delete ( Str $archive ) {

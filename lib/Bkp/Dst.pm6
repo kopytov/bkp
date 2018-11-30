@@ -79,7 +79,11 @@ method SEND () {
     my $next-archive = $.next-archive;
     my $next-period  = ~$1 if $next-archive ~~ $.is-archive;
     $.rotate($next-period);
-    $.send($next-archive);
+    my $proc = $.send($next-archive);
+    fail "dst.send process finished with code {$proc.exitcode}"
+        if $proc.exitcode > 0;
+    fail "dst.send got signal {$proc.signal}"
+        if $proc.signal > 0;
     $.clear-archives;
 }
 

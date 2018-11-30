@@ -52,7 +52,7 @@ method send ( Str $archive ) {
     my $filename = $!path.ends-with('/')
       ?? "$!path$archive" !! "$!path/$archive";
     $filename = ".$filename" if $filename.starts-with('/');
-    run «ncftpput -c -u $!username -p $!password $!hostname $filename»,
+    return run «ncftpput -c -u $!username -p $!password $!hostname $filename»,
       :in($.src.out);
 }
 
