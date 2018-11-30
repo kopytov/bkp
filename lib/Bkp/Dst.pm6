@@ -80,7 +80,6 @@ method SEND () {
     my $next-period  = ~$1 if $next-archive ~~ $.is-archive;
     $.rotate($next-period);
     $.send($next-archive);
-    $!proc.sink;
     $.clear-archives;
 }
 
