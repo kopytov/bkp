@@ -9,7 +9,7 @@
         "bugtracker" : "https://github.com/kopytov/bkp/issues",
         "source" : "git://github.com/kopytov/bkp.git"
     },
-    "depends": [ "YAMLish" ],
+    "depends": [ "YAMLish", "XML" ],
     "provides": {
         "Bkp": "lib/Bkp.pm6",
         "Bkp::Src": "lib/Bkp/Src.pm6",
@@ -17,6 +17,7 @@
         "Bkp::Src::Mysql": "lib/Bkp/Src/Mysql.pm6",
         "Bkp::Src::Ploop": "lib/Bkp/Src/Ploop.pm6",
         "Bkp::Src::Redis": "lib/Bkp/Src/Redis.pm6",
+        "Bkp::Src::Lvm": "lib/Bkp/Src/Lvm.pm6",
         "Bkp::Src::Tar": "lib/Bkp/Src/Tar.pm6",
         "Bkp::Middleware": "lib/Bkp/Middleware.pm6",
         "Bkp::Compress::Gzip": "lib/Bkp/Compress/Gzip.pm6",
