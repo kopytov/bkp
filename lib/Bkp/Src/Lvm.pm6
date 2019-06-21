@@ -12,8 +12,7 @@ has Str     $.virsh = 'virsh';
 has Str     $.device   = getdomdevice($!virsh, $!vm);
 has Str     $!snapsuff = '_backup';
 has Str     $!snapshot = $!vm ~ '_img' ~ $!snapsuff;
-has Str     $!snapdev  = sub ($_)
-    { $_.IO.e ?? fail "device $_ already exists" !! return $_ }("$!device$!snapsuff");
+has Str     $!snapdev;
 has Str     $!quiet    = %*ENV<BKP_LOG> ?? '' !! '--quiet';
 
 sub getdomdevice($virsh, $vm) {
@@ -60,10 +59,14 @@ method domfsthaw () {
 }
 
 method create-snapshot () {
-    return if $!snapdev.IO.e;
+    fail "device $!device$!snapsuff already exists"
+      if !$!snapdev.defined && "$!device$!snapsuff".IO.e;
+    $!snapdev = $!device ~ $!snapsuff;
+
     %*ENV<LVM_SUPPRESS_FD_WARNINGS> = 1;
 
-    my $size = '5368709120';
+    # set default snapshot size to fix case if script can't get real device size
+    my $size = 5368709120;
     my $proc = run «lvs $!device --nosuffix --units b -o size --no-headings», :out;
     $proc.out.slurp-rest ~~ /( \d+ )/;
     if $0.defined {
