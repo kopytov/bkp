@@ -8,6 +8,28 @@ sub log ( Str:D $message ) {
     note "$time bkp: [$*PID] $message";
 }
 
+sub load-profiles ( FilePath $filename ) {
+    my %config = load-yaml $filename.IO.slurp;
+    my %profile_of;
+    if %config<src><class> {
+        my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
+          ?? ~$0 !! $filename.IO.basename.lc;
+        %config<dst><prefix> //= $prefix;
+        %profile_of{$prefix} = %config;
+        return %profile_of;
+    }
+
+    my %src_of = %config<src>:delete;
+    for %src_of.keys.sort -> $name {
+        my %profile;
+        %profile{$_}          = %config{$_}.clone for %config.keys;
+        %profile<src>         = %src_of{$name};
+        %profile<dst><prefix> = $name;
+        %profile_of{$name}    = %profile;
+    }
+    return %profile_of;
+}
+
 sub load-profile ( FilePath $filename ) {
     my %profile = load-yaml $filename.IO.slurp;
     my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
@@ -41,39 +63,46 @@ sub get-dst (%profile) {
     return $dst;
 }
 
-multi MAIN (*@profiles) {
-    return unless @profiles.elems;
-    log "Got profile: $_" for @profiles;
-  PROFILE: for @profiles -> $profile {
-      ATTEMPT: for ^10 -> $attempt {
-            log $profile.IO.basename ~ " started [$attempt]";
-            my %profile;
-            try {
-                CATCH {
-                    say $profile.IO.basename ~ " loading failed - skipping";
-                    .Str.say;
-                    next PROFILE;
-                }
-                %profile = load-profile $profile;
+multi MAIN (*@configs) {
+    return unless @configs.elems;
+    log "Got configs: $_" for @configs;
+  CONFIG: for @configs -> $config {
+        log $config.IO.basename ~ ' started';
+        my %profile_of;
+        try {
+            CATCH {
+                say $config.IO.basename ~ " loading failed - skipping";
+                .Str.say;
+                next CONFIG;
             }
-
-            my $dst = get-dst %profile;
-            try {
-                CATCH {
-                    say $profile.IO.basename ~ " failed [$attempt]";
-                    say $profile.IO.basename ~ " exception: " ~ .Str;
-                    $dst.src.KILL;
-                    sleep $attempt * 180;
-                    next ATTEMPT;
-                }
-                $dst.SEND;
-            }
-            $dst.src.clean-up;
-            $dst.umount;
-            log $profile.IO.basename ~ " finished [$attempt]";
-            next PROFILE;
+            %profile_of = load-profiles $config;
+            log "Got profiles: $_" for %profile_of.keys.sort;
         }
-        say 'BACKUP ' ~ $profile.IO.basename ~ ' FAILED!';
+
+      PROFILE: for %profile_of.keys.sort -> $name {
+          my %profile = %profile_of{$name};
+          ATTEMPT: for ^10 -> $attempt {
+                log $config.IO.basename ~ ":$name started [$attempt]";
+                %profile.gist.say;
+                my $dst = get-dst %profile;
+                try {
+                    CATCH {
+                        say $config.IO.basename ~ ":$name failed [$attempt]";
+                        say $config.IO.basename ~ ":$name exception: " ~ .Str;
+                        $dst.src.KILL;
+                        sleep $attempt * 180;
+                        next ATTEMPT;
+                    }
+                    $dst.SEND;
+                }
+                $dst.src.clean-up;
+                $dst.umount;
+                log $config.IO.basename ~ ":$name finished [$attempt]";
+                next PROFILE;
+            }
+            say 'BACKUP ' ~ $config.IO.basename ~ ":$name FAILED!";
+        }
+        log $config.IO.basename ~ ' finished';
     }
 }
 
