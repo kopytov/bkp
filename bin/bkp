@@ -30,14 +30,6 @@ sub load-profiles ( FilePath $filename ) {
     return %profile_of;
 }
 
-sub load-profile ( FilePath $filename ) {
-    my %profile = load-yaml $filename.IO.slurp;
-    my $prefix = $filename ~~ rx{:i (<-[ / ]>+) \. ya?ml $}
-      ?? ~$0 !! $filename.IO.basename.lc;
-    %profile<dst><prefix> //= $prefix;
-    return %profile;
-}
-
 sub load-class ( Str:D $namespace, Str:D $class ) {
     my $package = "Bkp::{$namespace.lc.tc}::{$class.lc.tc}";
     try require ::($package);
