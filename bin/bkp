@@ -80,11 +80,9 @@ multi MAIN (*@configs) {
         }
 
       PROFILE: for %profile_of.keys.sort -> $name {
-          my %profile = %profile_of{$name};
           ATTEMPT: for ^10 -> $attempt {
                 log $config.IO.basename ~ ":$name started [$attempt]";
-                %profile.gist.say;
-                my $dst = get-dst %profile;
+                my $dst = get-dst %profile_of{$name};
                 try {
                     CATCH {
                         say $config.IO.basename ~ ":$name failed [$attempt]";
@@ -106,40 +104,63 @@ multi MAIN (*@configs) {
     }
 }
 
-multi MAIN ( 'list', FilePath $profile, Bool :$bytes = False ) {
-    my %profile = load-profile $profile;
-    my $dst     = get-dst %profile;
-    if $bytes {
-        say "$_{'file'} $_{'size'}" for $dst.all-archives;
-    }
-    else {
-        ARCHIVE: for $dst.all-archives -> $archive {
-            my @suffixes = (
-                1099511627776 => 'T',
-                1073741824    => 'G',
-                1048576       => 'M',
-                1024          => 'K',
-            );
-            for @suffixes {
-                my ( $factor, $suffix ) = $_.kv;
-                if $archive<size> >= $factor {
-                    my $human_readable_size = ( $archive<size> / $factor ).fmt: "%.1f$suffix";
-                    say "$archive<file> $human_readable_size";
-                    next ARCHIVE;
-                }
-            }
-            say "$archive<file> $archive<size>B";
+multi MAIN ( 'list', FilePath $config, Bool :$bytes = False ) {
+    my %profile_of = load-profiles $config;
+    for %profile_of.keys.sort -> $name {
+        state $i = 1;
+        if %profile_of.keys.elems > 1 {
+            say "" if $i > 1;
+            say "$name:";
+            say "";
         }
+
+        my $dst     = get-dst %profile_of{$name};
+        if $bytes {
+            say "$_{'file'} $_{'size'}" for $dst.all-archives;
+        }
+        else {
+            ARCHIVE: for $dst.all-archives -> $archive {
+                my @suffixes = (
+                    1099511627776 => 'T',
+                    1073741824    => 'G',
+                    1048576       => 'M',
+                    1024          => 'K',
+                );
+                for @suffixes {
+                    my ( $factor, $suffix ) = $_.kv;
+                    if $archive<size> >= $factor {
+                        my $human_readable_size = ( $archive<size> / $factor ).fmt: "%.1f$suffix";
+                        say "$archive<file> $human_readable_size";
+                        next ARCHIVE;
+                    }
+                }
+                say "$archive<file> $archive<size>B";
+            }
+        }
+        $dst.umount;
+        $i++;
     }
-    $dst.umount;
 }
 
-multi MAIN ( 'download', FilePath $profile, Str $archive,
+multi MAIN ( 'download', FilePath $config, Str $archive,
+    Str  :$profile,
     Str  :$filename = $archive,
     Bool :$force    = False,
 ) {
-    my %profile = load-profile $profile;
-    my $dst     = get-dst %profile;
+    my %profile_of = load-profiles $config;
+    my $name       = $profile;
+
+    if $name.defined {
+        fail "profile $name not known in $config"
+            unless %profile_of{$name}:exists;
+    }
+    else {
+        fail "--profile should be specified for $config"
+            if %profile_of.keys.elems > 1;
+        $name = %profile_of.keys.first;
+    }
+
+    my $dst = get-dst %profile_of{$name};
     if ( $filename eq '-' ) {
         run 'cat', :in( $dst.out($archive) );
     }
