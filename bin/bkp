@@ -96,11 +96,12 @@ multi MAIN (*@configs) {
     }
 }
 
-multi MAIN ( 'list', FilePath $config, Bool :$bytes = False ) {
+multi MAIN ( 'list', FilePath $config, Bool :$bytes = False, Str :$profile ) {
     my %profile_of = load-profiles $config;
     for %profile_of.keys.sort -> $name {
+        next if $profile.defined && $profile ne $name;
         state $i = 1;
-        if %profile_of.keys.elems > 1 {
+        if %profile_of.keys.elems > 1 && !$profile.defined {
             say "" if $i > 1;
             say "$name:";
             say "";
@@ -165,4 +166,9 @@ multi MAIN ( 'download', FilePath $config, Str $archive,
         run 'cat', :in( $dst.out($archive) ), :out($fh);
     }
     $dst.umount;
+}
+
+multi MAIN ( 'list-profiles', FilePath $config ) {
+    my %profile_of = load-profiles $config;
+    %profile_of.keys>>.say;
 }
