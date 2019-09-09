@@ -7,11 +7,12 @@ has Str $.hostname is required;
 has Str $.path     = "/{ qx{hostname -s}.trim }";
 has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
+has Int $.port     = 21;
 
 method !run-ncftp ( *%opt ) {
     my $url = "ftp://$!hostname$!path/";
     my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
-    return run «ncftp -u $!username -p $!password $url», :err($null), |%opt;
+    return run «ncftp -u $!username -p $!password -P $!port $url», :err($null), |%opt;
 }
 
 method mk_path () {
@@ -52,7 +53,7 @@ method send ( Str $archive ) {
     my $filename = $!path.ends-with('/')
       ?? "$!path$archive" !! "$!path/$archive";
     $filename = ".$filename" if $filename.starts-with('/');
-    return run «ncftpput -c -u $!username -p $!password $!hostname $filename»,
+    return run «ncftpput -c -u $!username -p $!password -P $!port $!hostname $filename»,
       :in($.src.out);
 }
 
@@ -66,5 +67,5 @@ method delete ( Str $archive ) {
 
 method build-receive-cmd ( Str $archive ) {
     my $url = "ftp://$!hostname/$!path/$archive";
-    return «ncftpget -c -u $!username -p $!password $url»;
+    return «ncftpget -c -u $!username -p $!password -P $!port $url»;
 }
