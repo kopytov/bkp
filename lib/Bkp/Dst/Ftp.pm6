@@ -7,7 +7,7 @@ has Str $.hostname is required;
 has Str $.path     = "/{ qx{hostname -s}.trim }";
 has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
-has Str $.port     = 21;
+has Int $.port     = 21;
 
 method !run-ncftp ( *%opt ) {
     my $url = "ftp://$!hostname$!path/";
