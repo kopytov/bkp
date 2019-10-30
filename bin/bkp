@@ -8,6 +8,17 @@ sub log ( Str:D $message ) {
     note "$time bkp: [$*PID] $message";
 }
 
+sub render-src ( Str:D $script, Str:D $template ) {
+    my $proc = shell $script, :out;
+    my $yaml = q{};
+    while my $item = $proc.out.get {
+        my $chunk = $template.clone;
+        $chunk ~~ s:g[ '{{' \s* item \s* '}}' ] = $item;
+        $yaml  ~= $chunk;
+    }
+    return load-yaml($yaml);
+}
+
 sub load-profiles ( FilePath $filename ) {
     my %config = load-yaml $filename.IO.slurp;
     my %profile_of;
@@ -17,6 +28,11 @@ sub load-profiles ( FilePath $filename ) {
         %config<dst><prefix> //= $prefix;
         %profile_of{$prefix} = %config;
         return %profile_of;
+    }
+
+    if %config<src><script>:exists {
+        my %src = render-src( %config<src><script>, %config<src><template> );
+        %config<src> = %src;
     }
 
     my %src_of = %config<src>:delete;
