@@ -8,11 +8,15 @@ has Str $.path     = "/{ qx{hostname -s}.trim }";
 has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
 has Int $.port     = 21;
+has Str $.encoding = 'UTF-8';
 
 method !run-ncftp ( *%opt ) {
     my $url = "ftp://$!hostname$!path/";
     my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
-    return run «ncftp -u $!username -p $!password -P $!port $url», :err($null), |%opt;
+    return run «ncftp -u $!username -p $!password -P $!port $url»,
+      :err($null),
+      :enc($!encoding),
+      |%opt;
 }
 
 method mk_path () {
@@ -54,7 +58,8 @@ method send ( Str $archive ) {
       ?? "$!path$archive" !! "$!path/$archive";
     $filename = ".$filename" if $filename.starts-with('/');
     return run «ncftpput -c -u $!username -p $!password -P $!port $!hostname $filename»,
-      :in($.src.out);
+      :in($.src.out),
+      :enc($!encoding);
 }
 
 method delete ( Str $archive ) {
