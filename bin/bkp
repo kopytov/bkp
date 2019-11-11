@@ -104,6 +104,11 @@ multi MAIN (*@configs) {
                 $dst.src.clean-up;
                 $dst.umount;
                 log $config.IO.basename ~ ":$name finished [$attempt]";
+                if %profile_of{$name}<post>:exists {
+                    log $config.IO.basename ~ ":$name post hook started";
+                    shell %profile_of{$name}<post>;
+                    log $config.IO.basename ~ ":$name post hook finished";
+                }
                 next PROFILE;
             }
             say 'BACKUP ' ~ $config.IO.basename ~ ":$name FAILED!";
