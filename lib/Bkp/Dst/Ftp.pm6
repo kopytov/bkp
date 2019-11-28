@@ -4,14 +4,17 @@ use Bkp::Dst;
 unit class Bkp::Dst::Ftp is Bkp::Dst;
 
 has Str $.hostname is required;
-has Str $.path     = "/{ qx{hostname -s}.trim }";
+has Str $.path     = "{ qx{hostname -s}.trim }";
 has Str $.username = 'anonymous';
 has Str $.password = 'test@test.com';
 has Int $.port     = 21;
 has Str $.encoding = 'UTF-8';
 
 method !run-ncftp ( *%opt ) {
-    my $url = "ftp://$!hostname$!path/";
+    my $url  = $!path eq '/'|'.'       ?? "ftp://$!hostname/"
+            !! $!path.starts-with('/') ?? "ftp://$!hostname$!path"
+            !!                            "ftp://$!hostname/$!path"
+            ;
     my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
     return run «ncftp -u $!username -p $!password -P $!port $url»,
       :err($null),
@@ -43,6 +46,7 @@ method enumerate () {
     $proc.in.close;
     my @files;
     for $proc.out.lines -> $line {
+        next if $line ~~ rx{ 'http://www.NcFTP.com/contact/' };
         my ( $size, $file ) = split( /\s+/, $line)[ 4, 8 ];
         next if !$file or !$size;
         push @files, {
