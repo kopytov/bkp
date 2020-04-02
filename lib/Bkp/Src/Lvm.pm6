@@ -91,6 +91,9 @@ method snapsize {
     my $snapsize = $lvsize * 0.3;
     $snapsize = $vgfree if $snapsize > $vgfree;
 
+    my $mod = $snapsize % 512;
+    $snapsize -= $mod;
+
     $!snapsize = $snapsize.Int ~ 'b';
     return $!snapsize;
 }
