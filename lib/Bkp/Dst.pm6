@@ -3,6 +3,7 @@ unit class Bkp::Dst;
 has $.prefix is required;
 has $.src    is required;
 has %.plan   is required;
+has Bool $.no-rotate;
 
 has %!archives-of;
 has $!archives-of-initialized = False;
@@ -78,7 +79,7 @@ method next-archive () {
 method SEND () {
     my $next-archive = $.next-archive;
     my $next-period  = ~$1 if $next-archive ~~ $.is-archive;
-    $.rotate($next-period);
+    $.rotate($next-period) unless $.no-rotate;
     my $proc = $.send($next-archive);
     fail "dst.send process finished with code {$proc.exitcode}"
         if $proc.exitcode > 0;
