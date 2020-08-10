@@ -147,6 +147,18 @@ Bkp — система резервного копирования для все
 
 Описывает логический том LVM в качестве источника данных. Модуль создаёт снепшот и делает с него копию данных командой `dd`. Устройство можно описать, указав атрибут `device`. Альтернативный способ описания может быть применён, если вы используете панель управления SolusVM (тогда вместо `device` можно указать название виртуальной машины атрибутом `vm`). 
 
+### class: virsh
+
+    src:
+      VMname_disk1
+        class: virsh
+        vm: VMname
+        device: /var/lib/libvirt/images/VMname.qcow2
+      VMname_disk2
+        class: virsh
+        vm: VMname
+        device: /var/lib/libvirt/images/VMname_d2.qcow2
+
 ## compress
 
 Секция compress описывает способ сжатия потока данных.
