@@ -19,6 +19,7 @@
         "Bkp::Src::Redis": "lib/Bkp/Src/Redis.pm6",
         "Bkp::Src::Lvm": "lib/Bkp/Src/Lvm.pm6",
         "Bkp::Src::Tar": "lib/Bkp/Src/Tar.pm6",
+        "Bkp::Src::Virsh": "lib/Bkp/Src/Virsh.pm6",
         "Bkp::Middleware": "lib/Bkp/Middleware.pm6",
         "Bkp::Compress::Gzip": "lib/Bkp/Compress/Gzip.pm6",
         "Bkp::Compress::Pigz": "lib/Bkp/Compress/Pigz.pm6",
