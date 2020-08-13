@@ -52,7 +52,7 @@ method create-snapshot () {
         next if $file eq $!device;
         my $v      = $!devices{$file};
         my $target = $v<target>:v;
-        run «$!virsh blockcommit $!vm $target --active --verbose --pivot», :out($null);
+        run «$!virsh blockcommit $!vm $target --active --verbose --pivot», :out($null), :err($null);
         $v<snapshot>.IO.unlink;
     }
     $null.close unless %*ENV<BKP_LOG>;
@@ -63,7 +63,7 @@ method clean-up () {
     my $null = %*ENV<BKP_LOG> ?? $*OUT !! open '/dev/null', :w;
     my $target = $!devices{$!device}<target>;
     if $!snapfile.IO.e {
-        run «$!virsh blockcommit $!vm $target --active --verbose --pivot», :out($null);
+        run «$!virsh blockcommit $!vm $target --active --verbose --pivot», :out($null), :err($null);
         $!snapfile.IO.unlink;
     }
     run «$!virsh snapshot-delete $!vm $!snapshot --metadata», :out($null);
