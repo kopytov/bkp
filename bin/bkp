@@ -5,7 +5,7 @@ use Bkp;
 sub log ( Str:D $message ) {
     return unless %*ENV<BKP_LOG>;
     my $time = DateTime.now.truncated-to('second');
-    note "$time bkp: [$*PID] $message";
+    say "$time bkp: [$*PID] $message";
 }
 
 sub render-src ( Str:D $script, Str:D $template ) {
