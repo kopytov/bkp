@@ -4,7 +4,7 @@ use XML;
 
 unit class Bkp::Src::Virsh is Bkp::Src;
 
-has @.cmd = <dd>;
+has @.cmd = <dd status=none>;
 
 has Str  $.vm       is required;
 has Str  $.device   is required;

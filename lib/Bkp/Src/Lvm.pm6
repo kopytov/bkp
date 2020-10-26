@@ -5,7 +5,7 @@ use XML;
 unit class Bkp::Src::Lvm is Bkp::Src;
 
 has Str $.suffix = 'raw';
-has @.cmd = <dd>;
+has @.cmd = <dd status=none>;
 
 has Str $.vm;
 has Str $.virsh    = 'virsh';
