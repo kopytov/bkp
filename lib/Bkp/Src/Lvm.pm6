@@ -23,7 +23,9 @@ sub getdomdevice( $virsh, $vm ) {
     my $devname = $vm ~ '_img';
     for $xml.elements(:RECURSE(Inf), :TAG<disk>) -> $device {
         next if $device.attribs<device> ne 'disk';
-        my $file = $device.elements(:TAG<source>)[0].attribs<file>;
+        my $file = $device.elements(:TAG<source>)[0].attribs<file>
+                ?? $device.elements(:TAG<source>)[0].attribs<file>
+                !! $device.elements(:TAG<source>)[0].attribs<dev>;
         next if not $file ~~ m/\/<$devname>$/;
         fail "LV $file not exists" if !$file.IO.e;
         return $file;
